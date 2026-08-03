@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>피싱 방어력 테스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b0f1a;
+  --panel:#121826;
+  --panel2:#1a2234;
+  --line:#26304a;
+  --accent:#ff4d2e;
+  --accent-dim:#c93a20;
+  --teal:#2bd9a9;
+  --amber:#f5b93c;
+  --paper:#e9ebf1;
+  --bubble-in:#ffffff;
+  --bubble-out:#2a3a5e;
+  --txt:#f2f4f8;
+  --txt-dim:#8b94ab;
+  --danger-bg:#2a1210;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"IBM Plex Sans KR",sans-serif;
+  background:var(--ink);
+  color:var(--txt);
+  display:flex;align-items:center;justify-content:center;
+  background-image:radial-gradient(ellipse 80% 60% at 50% -10%, #16203a 0%, transparent 60%);
+}
+.frame{
+  width:100%;max-width:420px;height:100dvh;
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+  background:var(--ink);
+}
+@media(min-width:480px){
+  .frame{height:min(880px,94vh);border:1px solid var(--line);border-radius:24px;box-shadow:0 40px 120px rgba(0,0,0,.6)}
+}
+.screen{display:none;flex-direction:column;flex:1;min-height:0}
+.screen.on{display:flex}
+.hazard{
+  height:10px;flex:none;
+  background:repeating-linear-gradient(-45deg,var(--accent) 0 14px,var(--ink) 14px 28px);
+}
+button{font-family:inherit;cursor:pointer;border:none}
+
+/* ---------- INTRO ---------- */
+#scr-intro{padding:0}
+.intro-body{flex:1;overflow-y:auto;padding:28px 24px 24px;display:flex;flex-direction:column;gap:20px}
+.sys-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:.22em;color:var(--accent);font-weight:700;
+}
+.sys-tag::before{content:"";width:8px;height:8px;background:var(--accent);border-radius:50%;
+  animation:blink 1.2s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+h1.title{
+  font-family:"Black Han Sans",sans-serif;font-weight:400;
+  font-size:clamp(40px,11vw,52px);line-height:1.08;letter-spacing:-.01em;
+}
+h1.title em{font-style:normal;color:var(--accent)}
+.intro-sub{color:var(--txt-dim);font-size:14px;line-height:1.7}
+.notice{
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+  background:var(--panel);padding:14px 16px;font-size:12.5px;line-height:1.75;color:#c9d0e0;
+}
+.notice b{color:var(--txt)}
+.field label{display:block;font-size:11px;letter-spacing:.18em;color:var(--txt-dim);margin-bottom:8px;font-weight:700}
+.field input[type=text]{
+  width:100%;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  padding:13px 14px;font-size:16px;border-radius:10px;font-family:inherit;outline:none;
+}
+.field input[type=text]:focus{border-color:var(--accent)}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{
+  background:var(--panel);border:1px solid var(--line);color:var(--txt-dim);
+  padding:12px 8px;border-radius:10px;font-size:14px;font-weight:500;transition:.15s;
+}
+.chip.sel{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.chip small{display:block;font-size:10.5px;margin-top:2px;opacity:.75;font-weight:400}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--txt-dim);line-height:1.6}
+.consent input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
+.cta{
+  margin-top:auto;background:var(--accent);color:#fff;
+  font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:20px;letter-spacing:.04em;
+  padding:18px;border-radius:12px;transition:.15s;
+}
+.cta:disabled{background:var(--panel2);color:var(--txt-dim);cursor:not-allowed}
+.cta:not(:disabled):active{transform:scale(.98)}
+.tiny{font-size:11px;color:var(--txt-dim);text-align:center}
+
+/* ---------- CHAT ---------- */
+#scr-chat{background:var(--paper)}
+.chat-head{
+  flex:none;background:var(--ink);padding:14px 18px 12px;
+  display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);
+}
+.avatar{
+  width:40px;height:40px;border-radius:50%;background:var(--panel2);flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--txt-dim);
+  border:1px solid var(--line);
+}
+.who{flex:1;min-width:0}
+.who .num{font-size:15px;font-weight:700;letter-spacing:.02em}
+.who .warn{font-size:11px;color:var(--amber);display:flex;align-items:center;gap:5px;margin-top:2px}
+.timer{font-family:"IBM Plex Sans KR",monospace;font-size:13px;color:var(--txt-dim);font-variant-numeric:tabular-nums}
+.timer::before{content:"●";color:var(--accent);font-size:9px;margin-right:5px;animation:blink 1.2s steps(2) infinite}
+.chat-log{
+  flex:1;overflow-y:auto;padding:16px 14px 20px;display:flex;flex-direction:column;gap:10px;
+  scroll-behavior:smooth;
+}
+.day{align-self:center;font-size:11px;color:#8a90a0;background:#dcdfe8;padding:4px 12px;border-radius:20px;margin-bottom:4px}
+.msg{max-width:78%;display:flex;flex-direction:column;gap:3px;animation:pop .25s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg .bubble{
+  padding:11px 14px;font-size:15px;line-height:1.55;border-radius:16px;word-break:keep-all;
+  overflow-wrap:break-word;
+}
+.msg.in{align-self:flex-start}
+.msg.in .bubble{background:var(--bubble-in);color:#1c2233;border-top-left-radius:4px;box-shadow:0 1px 2px rgba(20,30,60,.08)}
+.msg.out{align-self:flex-end}
+.msg.out .bubble{background:var(--bubble-out);color:#fff;border-top-right-radius:4px}
+.msg .meta{font-size:10.5px;color:#9aa0b2;padding:0 4px}
+.msg.out .meta{text-align:right}
+.linkcard{
+  margin-top:6px;background:#f4f6fb;border:1px solid #d8dce8;border-radius:12px;overflow:hidden;
+  width:100%;text-align:left;font-family:inherit;
+}
+.linkcard .lc-top{padding:10px 12px;display:flex;gap:10px;align-items:center}
+.lc-ico{width:34px;height:34px;border-radius:8px;background:#2a3a5e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.lc-tt{font-size:13px;font-weight:700;color:#1c2233}
+.lc-url{font-size:11px;color:#7c8296}
+.lc-btn{display:block;width:100%;background:#2a3a5e;color:#fff;padding:10px;font-size:13px;font-weight:700;text-align:center}
+.sysnote{
+  align-self:center;max-width:92%;
+  background:#fff7ec;border:1px dashed #e3a63c;color:#7a5410;
+  font-size:12px;line-height:1.6;padding:10px 14px;border-radius:10px;text-align:center;
+  animation:pop .25s ease both;
+}
+.typing{align-self:flex-start;background:var(--bubble-in);border-radius:16px;border-top-left-radius:4px;padding:14px 16px;display:flex;gap:5px;box-shadow:0 1px 2px rgba(20,30,60,.08)}
+.typing i{width:7px;height:7px;border-radius:50%;background:#aab0c2;animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,60%,100%{transform:none;opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+.chat-input{
+  flex:none;display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:#fff;border-top:1px solid #dfe2ec;
+}
+.chat-input input{
+  flex:1;border:1px solid #d5d9e6;border-radius:22px;padding:11px 16px;font-size:16px;
+  font-family:inherit;outline:none;background:#f4f5f9;color:#1c2233;min-width:0;
+}
+.chat-input input:focus{border-color:#8b94ab}
+.send{
+  width:44px;height:44px;border-radius:50%;background:var(--bubble-out);color:#fff;font-size:17px;flex:none;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.send:disabled{background:#c5c9d6}
+.hangup{
+  width:44px;height:44px;border-radius:50%;background:#e8452c;color:#fff;font-size:16px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ---------- ENDING OVERLAY ---------- */
+.overlay{
+  position:absolute;inset:0;z-index:30;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:32px 28px;gap:16px;
+}
+.overlay.on{display:flex;animation:fadein .5s ease both}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.overlay.hook{background:linear-gradient(180deg,#3a0f08,#160604)}
+.overlay.win{background:linear-gradient(180deg,#04302a,#02120f)}
+.overlay.timeout{background:linear-gradient(180deg,#20283c,#0b0f1a)}
+.ov-tag{font-size:11px;letter-spacing:.3em;font-weight:700;color:rgba(255,255,255,.55)}
+.ov-title{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:clamp(34px,9.5vw,46px);line-height:1.15}
+.overlay.hook .ov-title{color:#ff6b4d}
+.overlay.win .ov-title{color:var(--teal)}
+.overlay.timeout .ov-title{color:var(--amber)}
+.ov-desc{font-size:14.5px;line-height:1.8;color:#e6e9f2;max-width:300px}
+.ov-btn{
+  margin-top:12px;background:#fff;color:#111;padding:15px 34px;border-radius:12px;
+  font-size:15px;font-weight:700;font-family:inherit;
+}
+
+/* ---------- REPORT ---------- */
+#scr-report{background:var(--ink)}
+.rep-head{flex:none;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+.rep-head h2{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:26px}
+.rep-head h2 em{font-style:normal;color:var(--accent)}
+.rep-stats{display:flex;gap:8px;margin-top:12px}
+.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center}
+.stat b{display:block;font-size:20px;font-weight:700}
+.stat span{font-size:10.5px;color:var(--txt-dim)}
+.stat.good b{color:var(--teal)}.stat.bad b{color:#ff6b4d}
+.rep-body{flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:14px}
+.rp{display:flex;flex-direction:column;gap:6px}
+.rp .tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{
+  font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:4px 9px;border-radius:20px;
+}
+.tag.tech{background:rgba(255,77,46,.14);color:#ff8368;border:1px solid rgba(255,77,46,.35)}
+.tag.plus{background:rgba(43,217,169,.12);color:var(--teal);border:1px solid rgba(43,217,169,.35)}
+.tag.minus{background:rgba(245,185,60,.12);color:var(--amber);border:1px solid rgba(245,185,60,.35)}
+.tag.fatal{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.rp .rb{
+  font-size:13.5px;line-height:1.6;padding:11px 14px;border-radius:12px;max-width:88%;
+}
+.rp.ai .rb{background:var(--panel);border:1px solid var(--line);color:#dfe4f0;align-self:flex-start;border-top-left-radius:4px}
+.rp.me{align-items:flex-end}
+.rp.me .tags{justify-content:flex-end}
+.rp.me .rb{background:var(--bubble-out);color:#fff;align-self:flex-end;border-top-right-radius:4px}
+.rp .why{font-size:11.5px;color:var(--txt-dim);line-height:1.6;padding:0 4px;max-width:88%}
+.rp.me .why{text-align:right;align-self:flex-end}
+.lexicon{border-top:1px solid var(--line);margin-top:8px;padding-top:16px}
+.lexicon h3{font-size:12px;letter-spacing:.2em;color:var(--txt-dim);margin-bottom:12px;font-weight:700}
+.lex{display:flex;gap:10px;margin-bottom:12px;font-size:12.5px;line-height:1.65}
+.lex .tag{flex:none;height:fit-content;margin-top:2px}
+.lex p{color:#c9d0e0}
+.rep-foot{flex:none;padding:14px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.rep-foot .cta{margin:0;width:100%}
+
+/* ---------- CARD ---------- */
+#scr-card{overflow-y:auto}
+.card-wrap{flex:1;display:flex;flex-direction:column;padding:20px 20px calc(20px + env(safe-area-inset-bottom));gap:14px;overflow-y:auto}
+.gradecard{
+  border-radius:20px;padding:30px 24px 26px;text-align:center;color:#fff;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;
+}
+.gradecard::after{
+  content:"";position:absolute;inset:auto 0 0 0;height:8px;
+  background:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 10px,transparent 10px 20px);
+}
+.gc-label{font-size:11px;letter-spacing:.3em;font-weight:700;opacity:.8}
+.gc-emoji{font-size:72px;line-height:1;margin:10px 0 4px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
+.gc-grade{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:38px;line-height:1.1}
+.gc-score{font-size:14px;font-weight:700;opacity:.9}
+.gc-quote{
+  margin-top:12px;background:rgba(0,0,0,.22);border-radius:12px;padding:12px 14px;
+  font-size:12.5px;line-height:1.65;max-width:100%;
+}
+.gc-quote b{display:block;font-size:10.5px;letter-spacing:.15em;opacity:.75;margin-bottom:4px}
+.tipbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;flex:none}
+.tipbox h3{font-size:12px;letter-spacing:.2em;color:var(--txt-dim);font-weight:700;margin-bottom:10px}
+.tipbox li{list-style:none;font-size:13.5px;line-height:1.7;padding-left:22px;position:relative;margin-bottom:8px;color:#dfe4f0}
+.tipbox li::before{content:"✓";position:absolute;left:0;color:var(--teal);font-weight:700}
+.hotline{
+  background:var(--danger-bg);border:1px solid rgba(255,77,46,.4);border-radius:14px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;flex:none;
+}
+.hotline .hl-num{font-family:"Black Han Sans",sans-serif;font-size:26px;color:var(--accent);font-weight:400}
+.hotline p{font-size:12px;color:#e0c4bc;line-height:1.55}
+.board{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;flex:none}
+.board h3{font-size:12px;letter-spacing:.2em;color:var(--txt-dim);font-weight:700;margin-bottom:10px}
+.board ol{list-style:none}
+.board li{display:flex;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.board li:last-child{border-bottom:none}
+.board .rank{width:22px;height:22px;border-radius:50%;background:var(--panel2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;color:var(--txt-dim)}
+.board li:first-child .rank{background:var(--amber);color:#241a02}
+.board .bn{flex:1}
+.board .bs{font-weight:700;color:var(--teal)}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.btn2{
+  padding:15px;border-radius:12px;font-size:14.5px;font-weight:700;font-family:inherit;
+}
+.btn2.pri{background:var(--accent);color:#fff}
+.btn2.ghost{background:var(--panel);color:var(--txt);border:1px solid var(--line)}
+.btn-save{width:100%;padding:15px;border-radius:12px;font-size:14.5px;font-weight:700;background:#fff;color:#111;flex:none}
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- INTRO -->
+  <section class="screen on" id="scr-intro">
+    <div class="hazard"></div>
+    <div class="intro-body">
+      <span class="sys-tag">TRAINING SIMULATION</span>
+      <h1 class="title">피싱 방어력<br><em>테스트</em></h1>
+      <p class="intro-sub">지금부터 AI 보이스피싱범이 당신에게 접근합니다.<br>당신은 과연 안 속을 수 있을까요?</p>
+      <div class="notice">
+        <b>훈련 안내</b> · 이것은 보이스피싱 <b>예방 훈련 시뮬레이션</b>입니다. 대화 중 어떤 요구를 받아도 <b>실제 개인정보를 입력하지 마세요.</b> 모든 입력은 저장되지 않으며 체험 종료 시 즉시 사라집니다.
+      </div>
+      <div class="field">
+        <label>닉네임</label>
+        <input type="text" id="nick" maxlength="8" placeholder="결과 카드에 표시됩니다" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>연령대 — 수법이 달라집니다</label>
+        <div class="chips" id="ageChips">
+          <button class="chip" data-age="10">10대<small>알바 · 지인 사칭</small></button>
+          <button class="chip" data-age="20">20대<small>알바 · 지인 사칭</small></button>
+          <button class="chip sel" data-age="30">30~50대<small>기관 사칭 · 대출</small></button>
+          <button class="chip" data-age="60">60대 이상<small>기관 · 자녀 사칭</small></button>
+        </div>
+      </div>
+      <label class="consent">
+        <input type="checkbox" id="agree">
+        <span>훈련 시뮬레이션임을 이해했고, 실제 개인정보를 입력하지 않겠습니다.</span>
+      </label>
+      <button class="cta" id="startBtn" disabled>수신 — 전화 받기</button>
+      <p class="tiny">데모 버전 · 검찰 사칭 시나리오 · 소요 약 3분</p>
+    </div>
+  </section>
+
+  <!-- CHAT -->
+  <section class="screen" id="scr-chat">
+    <header class="chat-head">
+      <div class="avatar">☎</div>
+      <div class="who">
+        <div class="num">02-3480-2000</div>
+        <div class="warn">⚠ 인증되지 않은 발신자</div>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+    </header>
+    <div class="chat-log" id="log">
+      <div class="day">오늘</div>
+    </div>
+    <div class="chat-input">
+      <button class="hangup" id="hangBtn" title="전화 끊기">✕</button>
+      <input type="text" id="inp" placeholder="메시지 입력" autocomplete="off" enterkeyhint="send">
+      <button class="send" id="sendBtn">➤</button>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section class="screen" id="scr-report">
+    <div class="rep-head">
+      <h2>판정 <em>리포트</em></h2>
+      <div class="rep-stats" id="stats"></div>
+    </div>
+    <div class="rep-body" id="repBody"></div>
+    <div class="rep-foot">
+      <button class="cta" id="toCard">내 등급 확인하기</button>
+    </div>
+  </section>
+
+  <!-- CARD -->
+  <section class="screen" id="scr-card">
+    <div class="hazard"></div>
+    <div class="card-wrap">
+      <div class="gradecard" id="gcard">
+        <span class="gc-label">피싱 방어력 테스트</span>
+        <div class="gc-emoji" id="gcEmoji"></div>
+        <div class="gc-grade" id="gcGrade"></div>
+        <div class="gc-score" id="gcScore"></div>
+        <div class="gc-quote" id="gcQuote"></div>
+      </div>
+      <button class="btn-save" id="saveBtn">결과 카드 이미지 저장</button>
+      <div class="tipbox">
+        <h3>오늘부터 지키는 3가지</h3>
+        <ul>
+          <li>수사기관·금융기관은 <b>절대</b> 전화로 이체·앱 설치를 요구하지 않습니다.</li>
+          <li>"비밀로 하라"는 말이 나오면 100% 사기 — 즉시 끊고 주변에 알리세요.</li>
+          <li>의심되면 끊고, 해당 기관 <b>대표번호로 직접</b> 다시 전화하세요.</li>
+        </ul>
+      </div>
+      <div class="hotline">
+        <span class="hl-num">1332</span>
+        <p>실제 피해가 의심되면 즉시 <b>금융감독원 1332</b> 또는 <b>경찰 112</b>. 지급정지는 빠를수록 돈을 지킵니다.</p>
+      </div>
+      <div class="board" id="board" style="display:none">
+        <h3>오늘의 방어왕</h3>
+        <ol id="boardList"></ol>
+      </div>
+      <div class="btnrow">
+        <button class="btn2 ghost" id="homeBtn">처음으로</button>
+        <button class="btn2 pri" id="retryBtn">다시 도전</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDING OVERLAYS -->
+  <div class="overlay hook" id="ovHook">
+    <span class="ov-tag">SIMULATION OVER</span>
+    <div class="ov-title">낚였습니다</div>
+    <p class="ov-desc" id="ovHookDesc">실제 상황이었다면, 방금 그 순간 당신의 계좌에 있던 돈이 대포통장으로 빠져나갔습니다.</p>
+    <button class="ov-btn" data-go="report">무슨 일이 있었는지 보기</button>
+  </div>
+  <div class="overlay win" id="ovWin">
+    <span class="ov-tag">SIMULATION OVER</span>
+    <div class="ov-title">방어 성공</div>
+    <p class="ov-desc">전화를 끊고 직접 확인하겠다는 판단 — 교과서적인 대응입니다. 실제 상황에서도 그대로만 하시면 됩니다.</p>
+    <button class="ov-btn" data-go="report">판정 리포트 보기</button>
+  </div>
+  <div class="overlay timeout" id="ovTimeout">
+    <span class="ov-tag">SIMULATION OVER</span>
+    <div class="ov-title">통화 종료</div>
+    <p class="ov-desc">낚이지는 않았지만, 끊지도 못한 채 끌려다녔습니다. 대화가 길어질수록 범인의 승률은 올라갑니다.</p>
+    <button class="ov-btn" data-go="report">판정 리포트 보기</button>
+  </div>
+
+</div>
+
+<script>
+/* ============ 시나리오: 검찰 사칭 ============ */
+const STAGES = [
+  {tag:"접근 · 권위", why:"실존 기관명 + 직함으로 신뢰를 만드는 첫 단계. 발신번호도 조작(변작)이 가능합니다.",
+   text:"여보세요, 고객님 휴대폰 명의자 본인 되십니까? 서울중앙지방검찰청 첨단범죄수사1부 김민준 수사관입니다."},
+  {tag:"공포 조성", why:"'내가 범죄에 연루됐다'는 충격으로 이성적 판단을 마비시킵니다.",
+   text:"다름이 아니라, 고객님 명의로 개설된 통장이 전기통신금융사기, 그러니까 보이스피싱 범죄에 사용된 정황이 확인돼서 연락드렸습니다. 현재 피의자 신분 전환 여부를 검토 중입니다."},
+  {tag:"고립", why:"주변에 알리지 못하게 차단 — 상담할 사람이 없으면 속을 확률이 급등합니다. '비밀 유지 요구'는 100% 사기 신호입니다.",
+   text:"이 사건은 현재 기밀 수사 중입니다. 가족분들이나 은행 직원에게 발설하시면 공무집행방해로 함께 입건될 수 있습니다. 절대 말씀하시면 안 됩니다."},
+  {tag:"긴급성", why:"'오늘 안에'라는 시간 압박으로 확인할 여유를 빼앗습니다. 진짜 수사는 전화로 시한을 걸지 않습니다.",
+   text:"오늘 오후 4시까지 무혐의 소명이 안 되면 구속영장이 청구됩니다. 지금 저희한테 협조만 해주시면 10분이면 끝나는 일입니다."},
+  {tag:"요구 · 개인정보", why:"본인 확인을 빙자한 개인정보 수집. 수사기관은 전화로 주민번호를 묻지 않습니다.", banner:true,
+   text:"먼저 본인 확인이 필요합니다. 성함하고 주민등록번호 열세 자리를 말씀해 주세요."},
+  {tag:"요구 · 금전", why:"'안전계좌'는 존재하지 않습니다. 이체하는 순간 대포통장으로 사라집니다.",
+   text:"명의 보호 조치를 해드리겠습니다. 계좌에 있는 자산을 금융감독원 안전계좌로 잠시 이체하셔야 합니다. 지금 주거래 은행이 어디십니까?"},
+  {tag:"요구 · 앱 설치", why:"원격제어 악성 앱. 설치하면 화면·문자·인증번호가 전부 범인에게 넘어갑니다.", link:true,
+   text:"비대면 조사 진행을 위해 검찰청 보안 프로그램을 설치하셔야 합니다. 아래 링크 눌러서 안내대로 설치해 주세요."},
+  {tag:"압박", why:"협조하지 않으면 불이익이라는 협박으로 마지막 저항을 꺾으려 합니다.",
+   text:"고객님, 지금 시간 끄실수록 불리해지는 건 고객님 본인입니다. 영장 집행 들어가면 그때는 저희도 도와드릴 방법이 없습니다."},
+  {tag:"회유", why:"협박 뒤의 친절 — '나는 네 편'이라는 회유로 판단을 흐립니다. 협박과 회유의 반복이 전형적 패턴입니다.",
+   text:"저도 고객님이 피해자라고 생각해서 이렇게까지 안내드리는 겁니다. 마지막으로 한 번만 더 여쭙겠습니다. 협조하시겠습니까?"}
+];
+const DEFLECT = {
+  defense:[
+    {tag:"차단 · 협박", why:"확인하려는 시도를 협박으로 막는 것 자체가 결정적 사기 신호입니다.",
+     text:"고객님, 지금 전화 끊으시면 수사 불응으로 간주됩니다. 바로 체포영장 발부될 수 있습니다."},
+    {tag:"차단 · 협박", why:"직접 확인을 막는 이유는 하나 — 확인하면 들통나기 때문입니다.",
+     text:"외부에 확인하시는 순간 수사 기밀 유출입니다. 고객님만 불리해지는 겁니다."}
+  ],
+  suspicion:[
+    {tag:"방어 회피", why:"그럴듯한 사건번호·직급으로 의심을 덮으려 합니다. 진짜 확인은 기관 대표번호로 직접 해야 합니다.",
+     text:"사건번호 2026고단3847, 담당 김민준 수사관입니다. 의심되시면 지금 검찰청 홈페이지에서 저희 부서 확인해 보세요. 다만 통화는 유지하셔야 합니다."},
+    {tag:"방어 회피", why:"'녹취 중'이라는 말로 오히려 참여자를 압박 — 의심을 죄책감으로 바꾸는 기술입니다.",
+     text:"지금 이 통화는 전부 녹취되고 있습니다. 협조 거부하시는 것도 기록에 남습니다."}
+  ]
+};
+const NUDGES = [
+  "고객님? 듣고 계십니까. 지금 확인 안 하시면 절차대로 진행할 수밖에 없습니다.",
+  "시간이 없습니다, 고객님. 영장 나가면 그때는 저희도 못 도와드립니다."
+];
+const GRADES = [
+  {min:81, name:"피싱 헌터 매", emoji:"🦅", bg:"#101828", msg:"완벽한 방어. 이제 주변 사람을 지켜줄 차례입니다."},
+  {min:61, name:"의심 많은 여우", emoji:"🦊", bg:"#d96a1e", msg:"훌륭한 감각. 다만 '확인 전화'까지 해야 진짜 방어입니다."},
+  {min:41, name:"눈치챈 고양이", emoji:"🐱", bg:"#0f8a6d", msg:"이상함은 느꼈지만 끊지 못했습니다. 의심되면 끊는 게 정답."},
+  {min:21, name:"흔들린 다람쥐", emoji:"🐿️", bg:"#c9861c", msg:"절반쯤 넘어갔습니다. '기밀·긴급·이체'가 나오면 무조건 사기."},
+  {min:0,  name:"깜빡 속은 금붕어", emoji:"🐠", bg:"#c73a22", msg:"괜찮습니다 — 여기는 훈련이니까. 실전에선 오늘을 기억하세요."}
+];
+
+/* ============ 상태 ============ */
+let S = null;
+const $ = s => document.querySelector(s);
+const log = $("#log"), inp = $("#inp"), sendBtn = $("#sendBtn");
+
+function newSession(){
+  return {stage:0, turns:0, score:50, defense:0, nudged:0, ended:false,
+          askedInfo:false, history:[], t0:Date.now(), nick:($("#nick").value.trim()||"참가자"), timerId:null, idleId:null};
+}
+
+/* ============ 화면 전환 ============ */
+function show(id){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));
+  $("#"+id).classList.add("on");
+}
+document.querySelectorAll(".overlay .ov-btn").forEach(b=>{
+  b.onclick = ()=>{ document.querySelectorAll(".overlay").forEach(o=>o.classList.remove("on")); buildReport(); show("scr-report"); };
+});
+
+/* ============ 인트로 ============ */
+let age = "30";
+$("#ageChips").addEventListener("click", e=>{
+  const c = e.target.closest(".chip"); if(!c) return;
+  document.querySelectorAll("#ageChips .chip").forEach(x=>x.classList.remove("sel"));
+  c.classList.add("sel"); age = c.dataset.age;
+});
+$("#agree").onchange = e => $("#startBtn").disabled = !e.target.checked;
+$("#startBtn").onclick = startChat;
+
+/* ============ 채팅 엔진 ============ */
+function startChat(){
+  S = newSession();
+  log.innerHTML = '<div class="day">오늘</div>';
+  inp.value = "";
+  show("scr-chat");
+  S.timerId = setInterval(()=> {
+    const s = Math.floor((Date.now()-S.t0)/1000);
+    $("#timer").textContent = String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+  }, 500);
+  setTimeout(()=> aiSay(STAGES[0], true), 900);
+}
+
+function scrollLog(){ log.scrollTop = log.scrollHeight; }
+
+function addBubble(dir, text, extra){
+  const m = document.createElement("div");
+  m.className = "msg "+dir;
+  const time = new Date().toTimeString().slice(0,5);
+  m.innerHTML = `<div class="bubble"></div><div class="meta">${time}</div>`;
+  m.querySelector(".bubble").textContent = text;
+  if(extra) m.querySelector(".bubble").appendChild(extra);
+  log.appendChild(m); scrollLog();
+}
+
+function addSysNote(html){
+  const n = document.createElement("div");
+  n.className = "sysnote"; n.innerHTML = html;
+  log.appendChild(n); scrollLog();
+}
+
+function typingOn(){
+  const t = document.createElement("div");
+  t.className = "typing"; t.id = "typing";
+  t.innerHTML = "<i></i><i></i><i></i>";
+  log.appendChild(t); scrollLog();
+}
+function typingOff(){ const t = $("#typing"); if(t) t.remove(); }
+
+function aiSay(item, advance){
+  if(S.ended) return;
+  typingOn();
+  const delay = Math.min(600 + item.text.length*14, 2100);
+  setTimeout(()=>{
+    if(S.ended) return;
+    typingOff();
+    let extra = null;
+    if(item.link){
+      extra = document.createElement("button");
+      extra.className = "linkcard";
+      extra.innerHTML = `<div class="lc-top"><div class="lc-ico">🛡</div><div><div class="lc-tt">검찰청 전자민원 보안센터</div><div class="lc-url">spo-security-check.kr</div></div></div><div class="lc-btn">보안 앱 설치하기</div>`;
+      extra.onclick = ()=> endGame("hook", "link");
+    }
+    addBubble("in", item.text, extra);
+    S.history.push({who:"ai", text:item.text, tag:item.tag, why:item.why});
+    if(item.banner && !S.askedInfo){
+      S.askedInfo = true;
+      setTimeout(()=> addSysNote("<b>훈련 안내</b> — 실제 정보 대신 아무 숫자나 입력해 보세요(예: 000000-0000000). 어떤 입력도 저장되지 않습니다."), 600);
+    }
+    armIdle();
+  }, delay);
+}
+
+function armIdle(){
+  clearTimeout(S.idleId);
+  if(S.nudged >= 2 || S.ended) return;
+  S.idleId = setTimeout(()=>{
+    if(S.ended) return;
+    if(document.activeElement === inp && inp.value.length > 0){ armIdle(); return; }
+    const n = NUDGES[S.nudged]; S.nudged++;
+    typingOn();
+    setTimeout(()=>{ if(S.ended) return; typingOff();
+      addBubble("in", n);
+      S.history.push({who:"ai", text:n, tag:"압박 · 침묵 공격", why:"머뭇거리는 침묵조차 압박 수단으로 씁니다. 생각할 시간을 주지 않는 게 목적입니다."});
+      armIdle();
+    }, 1100);
+  }, 15000);
+}
+
+/* ---- 분류기 ---- */
+const RX = {
+  digits:/\d{4,}/,
+  defense:/(끊|신고|112|1332|사기|피싱|안\s?해|안해요|못\s?해|싫|거절|직접\s?(전화|확인)|대표번호|경찰|검찰청.{0,6}(전화|확인|가|방문)|찾아가|응하지 않|협조.{0,4}않|못\s?믿|안\s?믿|믿을\s?수\s?없)/,
+  suspicion:/(누구|누군|왜요|어디\s?(소속|서)|무슨|진짜|정말|믿|증거|공문|서류|사건번호|이상|수상|보이스|맞아요\?|맞나요|확인)/,
+  comply:/(네|예|넵|알겠|알았|어떡|어떻게\s?(해야|하면)|해야\s?하|할게|하겠|얼마|무서|죄송|도와주)/
+};
+function classify(t){
+  if(RX.digits.test(t)) return "info";
+  if(RX.defense.test(t)) return "defense";
+  if(RX.suspicion.test(t)) return "suspicion";
+  if(RX.comply.test(t)) return "comply";
+  return "neutral";
+}
+const SCORE_META = {
+  defense:{d:+15, chip:"방어 행동 +15", cls:"plus", why:"끊기 선언·직접 확인·명확한 거절 — 가장 강력한 방어입니다."},
+  suspicion:{d:+10, chip:"의심 질문 +10", cls:"plus", why:"근거를 요구하는 질문. 좋은 신호지만, 범인은 준비된 답을 갖고 있습니다."},
+  comply:{d:-5, chip:"순응 반응 -5", cls:"minus", why:"지시에 따르기 시작 — 범인의 시나리오에 올라탄 상태입니다."},
+  neutral:{d:0, chip:"중립 ±0", cls:"minus", why:""},
+  info:{d:-30, chip:"정보 제공 -30", cls:"fatal", why:"결정적 순간 — 실제였다면 이 정보로 계좌가 열립니다."}
+};
+
+/* ---- 전송 ---- */
+function sendMsg(){
+  if(S.ended) return;
+  const t = inp.value.trim();
+  if(!t) return;
+  inp.value = "";
+  clearTimeout(S.idleId);
+  addBubble("out", t);
+  S.turns++;
+  const cls = classify(t);
+  const meta = SCORE_META[cls];
+  S.score = Math.max(0, Math.min(100, S.score + meta.d));
+  S.history.push({who:"me", text:t, cls});
+  if(cls === "info"){ return endGame("hook", "info"); }
+  if(cls === "defense"){
+    S.defense++;
+    if(S.defense >= 3) return endGame("win");
+  }
+  if(S.turns >= 10) return endGame("timeout");
+  // AI 응답
+  sendBtn.disabled = true;
+  const respond = ()=>{
+    sendBtn.disabled = false;
+    if(S.ended) return;
+    if(cls === "defense" || cls === "suspicion"){
+      const pool = DEFLECT[cls === "defense" ? "defense" : "suspicion"];
+      const d = pool[Math.min(S.defense + S.turns, 99) % pool.length];
+      aiSay(d, false);
+      setTimeout(()=>{ if(!S.ended && S.stage < STAGES.length-1){ S.stage++; aiSay(STAGES[S.stage]); } }, 2600);
+    } else {
+      if(S.stage < STAGES.length-1){ S.stage++; aiSay(STAGES[S.stage]); }
+      else endGame("timeout");
+    }
+  };
+  setTimeout(respond, 500);
+}
+sendBtn.onclick = sendMsg;
+inp.addEventListener("keydown", e=>{ if(e.key==="Enter") sendMsg(); });
+$("#hangBtn").onclick = ()=>{
+  if(S.ended) return;
+  S.defense += 3;
+  S.score = Math.min(100, S.score + 20);
+  S.history.push({who:"me", text:"(전화를 끊었다)", cls:"defense"});
+  endGame("win");
+};
+
+/* ---- 종료 ---- */
+function endGame(kind, how){
+  if(S.ended) return;
+  S.ended = true;
+  clearInterval(S.timerId); clearTimeout(S.idleId);
+  typingOff();
+  S.result = kind;
+  if(kind === "hook"){
+    S.score = Math.min(S.score, 35);
+    $("#ovHookDesc").textContent = how === "link"
+      ? "방금 누른 링크는 원격제어 악성 앱이었습니다. 실제였다면 지금 이 순간 당신의 화면·문자·인증번호가 전부 범인에게 중계되고 있습니다."
+      : "실제 상황이었다면, 방금 알려준 정보로 범인이 당신 명의의 계좌를 열고 대출까지 받아 갑니다.";
+  }
+  if(kind === "win") S.score = Math.min(100, S.score + 15);
+  setTimeout(()=> $("#ov"+{hook:"Hook",win:"Win",timeout:"Timeout"}[kind]).classList.add("on"), kind==="hook"?600:400);
+}
+
+/* ============ 리포트 ============ */
+function buildReport(){
+  const plus = S.history.filter(h=>h.who==="me" && (h.cls==="defense"||h.cls==="suspicion")).length;
+  const minus = S.history.filter(h=>h.who==="me" && (h.cls==="comply"||h.cls==="info")).length;
+  const techs = new Set(S.history.filter(h=>h.who==="ai").map(h=>h.tag.split(" ·")[0])).size;
+  $("#stats").innerHTML = `
+    <div class="stat"><b>${S.score}</b><span>방어 점수</span></div>
+    <div class="stat good"><b>+${plus}</b><span>방어·의심</span></div>
+    <div class="stat bad"><b>-${minus}</b><span>순응·제공</span></div>
+    <div class="stat"><b>${techs}</b><span>사용된 기법</span></div>`;
+  const body = $("#repBody");
+  body.innerHTML = "";
+  S.history.forEach(h=>{
+    const d = document.createElement("div");
+    if(h.who === "ai"){
+      d.className = "rp ai";
+      d.innerHTML = `<div class="tags"><span class="tag tech">기법 · ${h.tag}</span></div>
+                     <div class="rb"></div><div class="why"></div>`;
+      d.querySelector(".rb").textContent = h.text;
+      d.querySelector(".why").textContent = h.why;
+    } else {
+      const m = SCORE_META[h.cls];
+      d.className = "rp me";
+      d.innerHTML = `<div class="tags"><span class="tag ${m.cls}">${m.chip}</span></div>
+                     <div class="rb"></div>${m.why?`<div class="why"></div>`:""}`;
+      d.querySelector(".rb").textContent = h.text;
+      if(m.why) d.querySelector(".why").textContent = m.why;
+    }
+    body.appendChild(d);
+  });
+  const lex = document.createElement("div");
+  lex.className = "lexicon";
+  lex.innerHTML = `<h3>범인이 쓴 심리 기법 사전</h3>
+    <div class="lex"><span class="tag tech">권위</span><p>검찰·금감원 등 기관 사칭으로 복종 심리를 자극. 발신번호도 조작 가능합니다.</p></div>
+    <div class="lex"><span class="tag tech">긴급성</span><p>"오늘 4시까지" — 확인할 시간을 빼앗는 시간 압박. 진짜 기관은 시한을 걸지 않습니다.</p></div>
+    <div class="lex"><span class="tag tech">고립</span><p>"아무에게도 말하지 마세요" — 이 말이 나오면 100% 사기입니다.</p></div>
+    <div class="lex"><span class="tag tech">요구</span><p>정보·이체·앱 설치. 전화로 이걸 요구하는 기관은 세상에 없습니다.</p></div>`;
+  body.appendChild(lex);
+  body.scrollTop = 0;
+}
+$("#toCard").onclick = ()=>{ buildCard(); show("scr-card"); };
+
+/* ============ 등급 카드 ============ */
+function gradeOf(score){ return GRADES.find(g=>score>=g.min); }
+function fatalQuote(){
+  const f = S.history.find(h=>h.who==="me" && h.cls==="info");
+  if(f) return {label:"당신이 낚인 결정적 한마디", text:"“"+f.text+"”"};
+  const c = [...S.history].reverse().find(h=>h.who==="me" && h.cls==="comply");
+  if(S.result==="hook") return {label:"결정적 순간", text:"가짜 보안 앱 링크를 눌렀습니다."};
+  if(c) return {label:"가장 위험했던 순간", text:"“"+c.text+"”"};
+  const d = S.history.find(h=>h.who==="me" && h.cls==="defense");
+  if(d) return {label:"최고의 한마디", text:"“"+d.text+"”"};
+  return {label:"총평", text:"조용히 버텼지만, 끊는 게 이기는 겁니다."};
+}
+function buildCard(){
+  const g = gradeOf(S.score);
+  S.grade = g;
+  $("#gcard").style.background = g.bg;
+  $("#gcEmoji").textContent = g.emoji;
+  $("#gcGrade").textContent = g.name;
+  $("#gcScore").textContent = `${S.nick} · 방어 점수 ${S.score}점`;
+  const q = fatalQuote();
+  $("#gcQuote").innerHTML = `<b>${q.label}</b>${q.text}<br><span style="opacity:.8">${g.msg}</span>`;
+  saveBoard();
+}
+function saveBoard(){
+  let b = [];
+  try{ b = JSON.parse(localStorage.getItem("pdt_board")||"[]"); }catch(e){}
+  b.push({n:S.nick, s:S.score, g:S.grade.emoji});
+  b.sort((a,c)=>c.s-a.s); b = b.slice(0,5);
+  localStorage.setItem("pdt_board", JSON.stringify(b));
+  $("#board").style.display = "block";
+  $("#boardList").innerHTML = b.map((x,i)=>
+    `<li><span class="rank">${i+1}</span><span class="bn">${x.g} ${escHtml(x.n)}</span><span class="bs">${x.s}점</span></li>`).join("");
+}
+function escHtml(s){ return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---- 카드 이미지 저장 ---- */
+$("#saveBtn").onclick = async ()=>{
+  await document.fonts.load('400 120px "Black Han Sans"');
+  await document.fonts.load('700 40px "IBM Plex Sans KR"');
+  const g = S.grade, W = 1080, H = 1350;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const x = cv.getContext("2d");
+  x.fillStyle = g.bg; x.fillRect(0,0,W,H);
+  x.fillStyle = "rgba(255,255,255,.14)";
+  for(let i=-H;i<W+H;i+=64){ x.save(); x.translate(i,0); x.rotate(-Math.PI/4); x.fillRect(0,-200,20,H*2.2); x.restore(); }
+  x.fillStyle = g.bg; x.fillRect(60,60,W-120,H-120);
+  x.textAlign = "center"; x.fillStyle = "rgba(255,255,255,.75)";
+  x.font = '700 30px "IBM Plex Sans KR"';
+  x.fillText("피 싱  방 어 력  테 스 트", W/2, 170);
+  x.font = "300px serif"; x.fillText(g.emoji, W/2, 560);
+  x.fillStyle = "#fff"; x.font = '400 110px "Black Han Sans"';
+  x.fillText(g.name, W/2, 750);
+  x.font = '700 44px "IBM Plex Sans KR"';
+  x.fillText(`${S.nick} · 방어 점수 ${S.score}점`, W/2, 840);
+  x.fillStyle = "rgba(255,255,255,.85)"; x.font = '400 34px "IBM Plex Sans KR"';
+  wrapText(x, g.msg, W/2, 950, W-260, 52);
+  x.fillStyle = "rgba(0,0,0,.25)"; x.fillRect(140, 1080, W-280, 130);
+  x.fillStyle = "#fff"; x.font = '700 40px "IBM Plex Sans KR"';
+  x.fillText("의심되면 끊고 → 금융감독원 1332", W/2, 1158);
+  const a = document.createElement("a");
+  a.download = `피싱방어력_${g.name}_${S.score}점.png`;
+  a.href = cv.toDataURL("image/png"); a.click();
+};
+function wrapText(x, text, cx, y, maxW, lh){
+  const words = text.split(" "); let line = "";
+  for(const w of words){
+    if(x.measureText(line+w).width > maxW){ x.fillText(line, cx, y); y += lh; line = w+" "; }
+    else line += w+" ";
+  }
+  x.fillText(line.trim(), cx, y);
+}
+
+$("#retryBtn").onclick = startChat;
+$("#homeBtn").onclick = ()=> show("scr-intro");
+</script>
+</body>
+</html>

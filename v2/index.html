@@ -186,6 +186,18 @@ input::placeholder{color:#aeb3bd}
   font-size:14px;line-height:1.5;color:#1f242c;font-weight:500;transition:.12s;font-family:inherit}
 .ch:active{background:#eef1f5}
 
+/* ============ 1막 → 2막 브릿지 ============ */
+#s-bridge{background:var(--nite);align-items:center;justify-content:center;padding:34px 30px;position:relative}
+.btime{font-size:11px;letter-spacing:.36em;color:#5b6373;font-weight:700;opacity:0;animation:bf .8s ease .3s forwards}
+.bline{font-size:15px;line-height:1.95;color:#a9b1bf;text-align:center;max-width:312px;margin-top:15px;
+  opacity:0;animation:bf 1s ease 1.4s forwards;word-break:keep-all}
+.bline b{color:#fff;font-weight:600}
+.bsell{margin-top:20px;font-size:11.5px;letter-spacing:.05em;color:#e0533f;font-weight:700;
+  opacity:0;animation:bf .9s ease 2.9s forwards}
+@keyframes bf{to{opacity:1}}
+.bhint{position:absolute;bottom:34px;font-size:11.5px;color:#4d5564;opacity:0;animation:bf .8s ease 5.4s forwards}
+.notif.tap{cursor:pointer}
+
 /* ============ 막 전환 ============ */
 .actcard{position:absolute;inset:0;background:var(--nite);z-index:60;display:none;
   flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 30px;gap:13px}
@@ -509,6 +521,21 @@ input::placeholder{color:#aeb3bd}
   </div>
   <div class="clog" id="log2"><div class="dayp">오늘</div></div>
   <div class="choices" id="ch2"></div>
+</section>
+
+<!-- ===== 1막 → 2막 브릿지 ===== -->
+<section class="scr" id="s-bridge">
+  <span class="btime">3일 후</span>
+  <p class="bline" id="bLine"></p>
+  <div class="bsell">명단 판매 완료</div>
+  <div class="bhint">알림을 눌러 확인하세요</div>
+  <div class="notif tap" id="notif2">
+    <div class="ic">💬</div>
+    <div class="tx">
+      <div class="t1"><span>오픈채팅</span><em>지금</em></div>
+      <div class="t2">김서연님이 회원님을 '💰 하루 18만원 부업 4기'에 초대했습니다</div>
+    </div>
+  </div>
 </section>
 
 <!-- ===== 막 전환 카드 ===== -->
@@ -880,19 +907,22 @@ $("#out1").onclick=()=>{ if(ST.ended) return; ST.defends+=3; bumpRisk(-20);
 
 function endAct1(kind){
   ST.ended=true; ST.act1=kind; untype();
-  const map={
-    hooked:{an:"ACT 1 CLEARED",t:"넘어갔습니다",bad:1,
-      d:"실제였다면 지금 이 순간, 당신의 정보와 화면이 범인에게 넘어갔습니다. 하지만 진짜 놀라운 건 아직 남았습니다."},
-    dragged:{an:"ACT 1 CLEARED",t:"끌려다녔습니다",bad:1,
-      d:"결정적으로 넘어가진 않았지만 끊지도 못했습니다. 대화가 길어질수록 범인의 승률은 올라갑니다."},
-    survived:{an:"ACT 1 CLEARED",t:"버텼습니다",bad:0,
-      d:"잘 버티셨습니다. 그런데 이번엔 방식이 다릅니다. 혼자가 아니라 여럿이 옵니다."},
-    defended:{an:"ACT 1 CLEARED",t:"방어했습니다",bad:0,
-      d:"교과서적인 대응입니다. 하지만 다음 상대는 당신을 협박하지 않습니다. 오히려 친절합니다."}
+  const LINES={
+    hooked:`당신이 넘긴 정보는 그날 바로 <b>명단</b>이 되었습니다.<br>이름, 연령대, 관심사, 사는 곳까지.`,
+    dragged:`끝내 정보를 넘기지는 않았습니다.<br>하지만 <b>접수 때 적어낸 것만으로</b> 명단은 이미 완성돼 있었습니다.`,
+    survived:`끝내 정보를 넘기지는 않았습니다.<br>하지만 <b>접수 때 적어낸 것만으로</b> 명단은 이미 완성돼 있었습니다.`,
+    defended:`잘 끊어내셨습니다.<br>그런데 <b>접수 때 적어낸 정보</b>는 이미 명단에 올라 있었습니다.`
   };
-  const m=map[kind];
-  setTimeout(()=>actCard(m.an,m.t,m.bad,m.d,"2막 시작하기",startAct2),kind==="hooked"?500:400);
+  setTimeout(()=>showBridge(LINES[kind]), kind==="hooked"?700:500);
 }
+
+function showBridge(html){
+  $("#bLine").innerHTML=html;
+  $("#notif2").classList.remove("in");
+  show("s-bridge");
+  setTimeout(()=>$("#notif2").classList.add("in"), 4200);
+}
+$("#notif2").onclick=()=>{ $("#notif2").classList.remove("in"); setTimeout(startAct2,260); };
 function actCard(an,at,bad,ad,btn,fn){
   $("#acAn").textContent=an; $("#acAt").textContent=at;
   $("#acAt").className="at"+(bad?" bad":""); $("#acAd").textContent=ad;

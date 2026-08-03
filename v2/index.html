@@ -186,17 +186,11 @@ input::placeholder{color:#aeb3bd}
   font-size:14px;line-height:1.5;color:#1f242c;font-weight:500;transition:.12s;font-family:inherit}
 .ch:active{background:#eef1f5}
 
-/* ============ 1막 → 2막 브릿지 ============ */
-#s-bridge{background:var(--nite);align-items:center;justify-content:center;padding:34px 30px;position:relative}
-.btime{font-size:11px;letter-spacing:.36em;color:#5b6373;font-weight:700;opacity:0;animation:bf .8s ease .3s forwards}
-.bline{font-size:15px;line-height:1.95;color:#a9b1bf;text-align:center;max-width:312px;margin-top:15px;
-  opacity:0;animation:bf 1s ease 1.4s forwards;word-break:keep-all}
-.bline b{color:#fff;font-weight:600}
-.bsell{margin-top:20px;font-size:11.5px;letter-spacing:.05em;color:#e0533f;font-weight:700;
-  opacity:0;animation:bf .9s ease 2.9s forwards}
-@keyframes bf{to{opacity:1}}
-.bhint{position:absolute;bottom:34px;font-size:11.5px;color:#4d5564;opacity:0;animation:bf .8s ease 5.4s forwards}
-.notif.tap{cursor:pointer}
+/* ============ 대화방 초대 시스템 라인 ============ */
+.joinline{align-self:center;max-width:94%;background:rgba(255,255,255,.55);color:#3a4652;
+  font-size:11.5px;line-height:1.6;padding:7px 14px;border-radius:12px;text-align:center;
+  animation:up .3s ease both;font-weight:500}
+.joinline b{color:#1d2732;font-weight:700}
 
 /* ============ 막 전환 ============ */
 .actcard{position:absolute;inset:0;background:var(--nite);z-index:60;display:none;
@@ -492,50 +486,25 @@ input::placeholder{color:#aeb3bd}
   </div>
 </section>
 
-<!-- ===== 1막 · 개인화 기습 ===== -->
-<section class="scr chat-scr" id="s-act1">
+<!-- ===== 하나의 대화방 (1:1 → 단톡방) ===== -->
+<section class="scr chat-scr" id="s-chat">
   <div class="c-head">
-    <div class="av" id="a1av">💬</div>
-    <div class="nm"><div class="n1" id="a1name">—</div><div class="n2 risk" id="a1sub">—</div></div>
-    <div class="cnt" id="a1cnt">1막</div>
+    <div class="av" id="cav">💬</div>
+    <div class="nm"><div class="n1" id="cname">—</div><div class="n2 risk" id="csub">—</div></div>
+    <div class="cnt" id="ccnt">1:1</div>
   </div>
-  <div class="clog" id="log1"><div class="dayp">오늘</div></div>
-  <div class="cbar">
-    <button class="out" id="out1" title="대화 종료">✕</button>
-    <input type="text" id="inp1" placeholder="메시지 입력" autocomplete="off" enterkeyhint="send">
-    <button class="snd" id="snd1">➤</button>
-  </div>
-</section>
-
-<!-- ===== 2막 · 팀미션 단체방 ===== -->
-<section class="scr chat-scr" id="s-act2">
-  <div class="c-head">
-    <div class="av">👥</div>
-    <div class="nm"><div class="n1">💰 하루 18만원 부업 4기 (5)</div><div class="n2">팀장 김서연 · 팀원 4명</div></div>
-    <div class="cnt">2막</div>
-  </div>
-  <div class="gauge on" id="g2">
+  <div class="gauge" id="g2">
     <span class="lb">위험도</span>
     <div class="tr"><div class="fl" id="g2fill"></div></div>
     <span class="pc" id="g2pc">20%</span>
   </div>
-  <div class="clog" id="log2"><div class="dayp">오늘</div></div>
-  <div class="choices" id="ch2"></div>
-</section>
-
-<!-- ===== 1막 → 2막 브릿지 ===== -->
-<section class="scr" id="s-bridge">
-  <span class="btime">3일 후</span>
-  <p class="bline" id="bLine"></p>
-  <div class="bsell">명단 판매 완료</div>
-  <div class="bhint">알림을 눌러 확인하세요</div>
-  <div class="notif tap" id="notif2">
-    <div class="ic">💬</div>
-    <div class="tx">
-      <div class="t1"><span>오픈채팅</span><em>지금</em></div>
-      <div class="t2">김서연님이 회원님을 '💰 하루 18만원 부업 4기'에 초대했습니다</div>
-    </div>
+  <div class="clog" id="log"><div class="dayp">오늘</div></div>
+  <div class="cbar" id="typebar">
+    <button class="out" id="out1" title="대화 종료">✕</button>
+    <input type="text" id="inp1" placeholder="메시지 입력" autocomplete="off" enterkeyhint="send">
+    <button class="snd" id="snd1">➤</button>
   </div>
+  <div class="choices" id="ch2" style="display:none"></div>
 </section>
 
 <!-- ===== 막 전환 카드 ===== -->
@@ -826,8 +795,10 @@ function startAct1(){
   const key=pickScenario(), sc=SC[key];
   ST={sc:key, stage:0, turns:0, risk:20, curve:[{v:20,act:1}], hist:[], leaked:false,
       act1:"", act2:{}, defends:0, ended:false, quotes:[]};
-  $("#a1name").textContent=sc.from; $("#a1sub").textContent=sc.sub; $("#a1av").textContent=sc.av;
-  $("#log1").innerHTML='<div class="dayp">오늘</div>'; $("#inp1").value="";
+  $("#cname").textContent=sc.from; $("#csub").textContent=sc.sub; $("#cav").textContent=sc.av;
+  $("#ccnt").textContent="1:1"; $("#g2").classList.remove("on");
+  $("#typebar").style.display="flex"; $("#ch2").style.display="none"; $("#ch2").innerHTML="";
+  $("#log").innerHTML='<div class="dayp">오늘</div>'; $("#inp1").value="";
   $("#wTicket").textContent=P.ticket; $("#wKiosk").textContent=P.kiosk+"번";
   const qn=Math.floor(Math.random()*3)+1;
   $("#wQueue").textContent=qn+"명"; $("#wWait").textContent=(qn*3)+"분";
@@ -838,7 +809,7 @@ function startAct1(){
     $("#notifBody").textContent=first; $("#notif").classList.add("in");
   },2600);
   setTimeout(()=>{
-    $("#notif").classList.remove("in"); show("s-act1");
+    $("#notif").classList.remove("in"); show("s-chat");
     setTimeout(()=>{ pushAI(sc.steps[0]); ST.stage=0; },350);
   },6200);
 }
@@ -866,7 +837,7 @@ function typing(log){
 }
 function untype(){document.querySelectorAll(".typ").forEach(t=>t.remove())}
 function pushAI(step){
-  const log=$("#log1"); typing(log);
+  const log=$("#log"); typing(log);
   setTimeout(()=>{
     untype();
     const txt=step.t(P);
@@ -878,7 +849,7 @@ function pushAI(step){
     ST.hist.push({w:"ai",t:txt,tag:step.tag,why:step.why});
     if(step.banner){ setTimeout(()=>{ const n=document.createElement("div"); n.className="sysn";
       n.innerHTML="<b>훈련 안내</b> — 실제 정보 대신 아무 숫자나 입력해 보세요. 입력값은 저장되지 않습니다.";
-      $("#log1").appendChild(n); $("#log1").scrollTop=$("#log1").scrollHeight; },700); }
+      $("#log").appendChild(n); $("#log").scrollTop=$("#log").scrollHeight; },700); }
   }, Math.min(650+txtLen(step)*13,2000));
 }
 function txtLen(s){return s.t(P).length}
@@ -887,7 +858,7 @@ function send1(){
   if(ST.ended) return;
   const v=$("#inp1").value.trim(); if(!v) return;
   $("#inp1").value="";
-  bubble($("#log1"),"me",v);
+  bubble($("#log"),"me",v);
   const cls=classify(v); const m=META[cls];
   bumpRisk(m.d); ST.turns++;
   ST.hist.push({w:"me",t:v,cls});
@@ -907,22 +878,39 @@ $("#out1").onclick=()=>{ if(ST.ended) return; ST.defends+=3; bumpRisk(-20);
 
 function endAct1(kind){
   ST.ended=true; ST.act1=kind; untype();
-  const LINES={
-    hooked:`당신이 넘긴 정보는 그날 바로 <b>명단</b>이 되었습니다.<br>이름, 연령대, 관심사, 사는 곳까지.`,
-    dragged:`끝내 정보를 넘기지는 않았습니다.<br>하지만 <b>접수 때 적어낸 것만으로</b> 명단은 이미 완성돼 있었습니다.`,
-    survived:`끝내 정보를 넘기지는 않았습니다.<br>하지만 <b>접수 때 적어낸 것만으로</b> 명단은 이미 완성돼 있었습니다.`,
-    defended:`잘 끊어내셨습니다.<br>그런데 <b>접수 때 적어낸 정보</b>는 이미 명단에 올라 있었습니다.`
-  };
-  setTimeout(()=>showBridge(LINES[kind]), kind==="hooked"?700:500);
+  setTimeout(escalate, 900);
 }
 
-function showBridge(html){
-  $("#bLine").innerHTML=html;
-  $("#notif2").classList.remove("in");
-  show("s-bridge");
-  setTimeout(()=>$("#notif2").classList.add("in"), 4200);
+/* 받침에 따라 '로/으로' 선택 (ㄹ 받침은 '로') */
+function josaRo(s){
+  const c=s.charCodeAt(s.length-1)-0xAC00;
+  if(c<0||c>11171) return "로";
+  const jong=c%28;
+  return (jong===0||jong===8)?"로":"으로";
 }
-$("#notif2").onclick=()=>{ $("#notif2").classList.remove("in"); setTimeout(startAct2,260); };
+
+/* 같은 대화방에 공범들이 초대되며 단톡방으로 확대 */
+function escalate(){
+  const A=ACT2[ST.sc], log=$("#log");
+  ST.ended=false;
+  $("#typebar").style.display="none";
+  const note=(html,delay)=>setTimeout(()=>{
+    const d=document.createElement("div"); d.className="joinline"; d.innerHTML=html;
+    log.appendChild(d); log.scrollTop=log.scrollHeight;
+  },delay);
+  note(`<b>${A.by}</b>님이 대화방 이름을 '<b>${A.room}</b>'${josaRo(A.room)} 변경했습니다`,300);
+  A.invited.forEach((n,i)=> note(`<b>${A.by}</b>님이 <b>${n}</b>님을 초대했습니다`, 1100+i*750));
+  const after=1100+A.invited.length*750+700;
+  setTimeout(()=>{
+    $("#cav").textContent="👥";
+    $("#cname").textContent=`${A.room} (${A.cnt})`;
+    $("#csub").textContent=`참여자 ${A.cnt}명 · 저장되지 않은 번호 포함`;
+    $("#ccnt").textContent=A.cnt+"명";
+    $("#g2").classList.add("on"); paintGauge();
+    $("#ch2").style.display="flex";
+    a2i=0; runA2();
+  }, after);
+}
 function actCard(an,at,bad,ad,btn,fn){
   $("#acAn").textContent=an; $("#acAt").textContent=at;
   $("#acAt").className="at"+(bad?" bad":""); $("#acAd").textContent=ad;
@@ -930,78 +918,244 @@ function actCard(an,at,bad,ad,btn,fn){
   $("#acBtn").onclick=()=>{$("#actcard").classList.remove("on");fn()};
 }
 
-/* ===================== 2막 · 팀미션 단체방 ===================== */
-const CREW={lead:"김서연 팀장",a:"이지수",b:"박민혁",c:"최은서"};
-const ACT2=[
-  {lines:[
-    {w:CREW.lead,t:p=>`${p.name}님 환영합니다! 4기 마지막 자리 들어오셨어요 🎉`},
-    {w:CREW.a,t:_=>`안녕하세요~ 저 3개월차인데 여기 진짜 괜찮아요 ㅎㅎ`},
-    {w:CREW.lead,t:_=>`오늘 미션은 간단해요. 앱 3개 평가하고 후기 남기기, 개당 1천원입니다. 30분이면 끝나요`},
-    {w:CREW.b,t:_=>`저 벌써 다 했습니다 ㅋㅋ`}],
-   q:"첫 미션 안내를 받았습니다. 어떻게 하시겠어요?",
-   opts:[
-     {t:"바로 시작한다. 어차피 후기 쓰는 건데 손해 볼 게 없다",d:12,tag:"순응",why:"'손해 볼 게 없다'가 정확히 그들이 노리는 판단입니다. 진입 장벽을 최대한 낮춰서 일단 발을 들이게 만듭니다."},
-     {t:"업체명과 사업자등록번호를 물어본다",d:-14,tag:"의심 질문",why:"정상적인 검증 시도입니다. 실제 부업사기는 이 질문에 그럴듯한 가짜 정보로 답하지만, 물어보는 습관 자체가 방어선입니다."},
-     {t:"다른 팀원들이 있으니 일단 지켜본다",d:4,tag:"사회적 증명",why:"팀원 전원이 바람잡이입니다. '다들 하고 있다'는 판단 근거 자체가 조작된 것입니다."}
-   ]},
-  {lines:[
-    {w:CREW.lead,t:_=>`수고하셨어요! 방금 3,000원 입금했습니다 확인해보세요`,proof:"+3,000원"},
-    {w:CREW.c,t:_=>`저도 들어왔어요! 진짜 주네요 ㅎㅎ`},
-    {w:CREW.lead,t:_=>`오늘만 특별 미션 있어요. 30만원 결제하고 리뷰 작성하시면 45만원으로 환급됩니다. 15만원 차익이에요`},
-    {w:CREW.b,t:_=>`저 방금 넣었습니다 ㅋㅋ 이거 안 하면 손해죠`}],
-   q:"소액이 실제로 입금됐고, 특별 미션이 제안됐습니다.",
-   opts:[
-     {t:"3천원이 진짜 들어왔으니 믿을 만하다. 참여한다",d:26,tag:"매몰비용 · 신뢰 구축",why:"초반 소액 지급은 비용이 아니라 투자입니다. 3천원으로 30만원을 낚는 구조이고, 이 단계가 부업사기의 핵심 설계입니다."},
-     {t:"내 돈이 나가는 미션은 하지 않겠다고 말한다",d:-20,tag:"방어 행동",why:"정확합니다. 어떤 정상적인 부업도 노동자에게 선입금을 요구하지 않습니다. 이 한 줄만 기억하면 됩니다."},
-     {t:"금액이 부담되니 10만원만 가능한지 물어본다",d:14,tag:"협상 = 순응",why:"금액을 깎는 순간 '할지 말지'가 아니라 '얼마나 할지'로 논점이 옮겨갑니다. 이미 절반은 넘어간 상태입니다."}
-   ]},
-  {lines:[
-    {w:CREW.lead,t:_=>`팀 미션은 전원이 완료해야 정산됩니다. 한 분이라도 빠지면 오늘 팀 전체가 정산을 못 받아요`},
-    {w:CREW.a,t:p=>`${p.name}님… 저 오늘 정산 꼭 받아야 하는데 ㅠㅠ 부탁드려요`},
-    {w:CREW.c,t:_=>`저도 사실 부담됐는데 그냥 했어요. 다들 기다리시니까…`},
-    {w:CREW.b,t:_=>`한 분 때문에 전체가 못 받는 건 좀 아니지 않나요`}],
-   q:"팀원들이 당신 때문에 정산을 못 받는다고 합니다.",
-   opts:[
-     {t:"팀에 피해를 줄 수 없으니 참여한다",d:30,tag:"연대책임 가스라이팅",why:"경찰청이 지목한 팀미션 부업사기의 핵심 수법입니다. 죄책감으로 판단을 마비시킵니다. 그 팀원들은 전부 한 편이고, 진짜 피해자는 당신 혼자입니다."},
-     {t:"이런 압박은 사기 수법이라고 말하고 나간다",d:-24,tag:"방어 행동",why:"완벽합니다. '너 때문에 전체가 손해'라는 말이 나오는 순간이 나가야 할 시점입니다."},
-     {t:"팀장에게 개인적으로 사정을 설명한다",d:10,tag:"관계 유지 = 순응",why:"대화를 이어가는 선택입니다. 압박 구조 안에 남아 있는 한 결론은 정해져 있습니다."}
-   ]},
-  {lines:[
-    {w:CREW.lead,t:_=>`정산 신청 확인했습니다. 출금하시려면 VIP 등급 업그레이드가 필요해요. 30만원 추가 결제하시면 바로 전액 출금됩니다`},
-    {w:CREW.a,t:_=>`아 저도 그거 했어요 ㅠㅠ 어쩔 수 없더라고요`},
-    {w:CREW.lead,t:_=>`오늘 안에 안 하시면 그동안 적립된 금액 전부 소멸됩니다`}],
-   q:"출금하려니 추가 결제를 요구합니다.",
-   opts:[
-     {t:"여기까지 넣은 게 아까워서 마지막으로 결제한다",d:34,tag:"매몰비용 함정",why:"출금 조건은 계속 새로 생깁니다. 수수료, 보증금, 등급 업그레이드… 끝이 없습니다. 처음부터 출금은 설계에 없었습니다."},
-     {t:"경찰에 신고하겠다고 말하고 방을 나간다",d:-30,tag:"방어 행동",why:"정답입니다. 잃은 돈은 아깝지만, 이미 잃은 돈을 되찾으려는 시도가 피해를 키웁니다. 즉시 112·1332로 신고하세요."},
-     {t:"환불을 요구하며 계속 항의한다",d:6,tag:"항의 = 체류",why:"항의도 대화입니다. 대화가 이어지는 동안 그들은 다음 설득 카드를 꺼냅니다. 나가는 것이 유일한 방어입니다."}
-   ]}
-];
+/* ===================== 2막 · 같은 사기의 확대 (동일 대화방) ===================== */
+const ACT2={
+job:{room:"2026 상반기 신입 온보딩",cnt:4,by:"박지훈 매니저",
+  invited:["정민석 선임","한소희"],
+  steps:[
+   {lines:[
+     {w:"박지훈 매니저",t:p=>`${p.name}님, 합격자 단톡방으로 옮겼습니다. 여기서 입사 절차 안내드릴게요.`},
+     {w:"정민석 선임",t:_=>`반갑습니다~ 저는 작년 공채 입사한 선임입니다. 궁금한 거 편하게 물어보세요 ㅎㅎ`},
+     {w:"한소희",t:_=>`저도 이번에 같이 합격했어요! 잘 부탁드립니다 :)`},
+     {w:"박지훈 매니저",t:_=>`입사 전 필수 이수 과정이 있습니다. 사내 보안교육인데 온라인으로 3시간이면 끝나요.`}],
+    q:"합격자 단톡방에 들어왔습니다.",
+    opts:[
+      {t:"동기랑 선배까지 있으니 안심된다. 안내를 따른다",d:12,tag:"사회적 증명",
+       why:"이 방에서 진짜 지원자는 당신 한 명입니다. 선배도 동기도 전부 같은 조직이고, '여러 명이 있다'는 사실 자체가 조작된 안심 장치입니다."},
+      {t:"회사 공식 채용 페이지에서 절차를 직접 확인하겠다고 한다",d:-15,tag:"직접 확인",
+       why:"정확합니다. 금융감독원은 '채용담당자가 개인 메신저로 대화를 유도하면 사기'라고 명시했습니다. 확인은 반드시 회사 대표번호나 공식 채용 사이트로 하세요."},
+      {t:"교육이 뭔지 먼저 물어본다",d:4,tag:"대화 지속",
+       why:"질문은 좋지만, 이미 그들의 각본 안입니다. 준비된 답이 돌아오고 다음 단계로 넘어갑니다."}
+    ]},
+   {lines:[
+     {w:"박지훈 매니저",t:_=>`교육비는 35만원이고 입사 후 첫 급여에 전액 환급됩니다. 회계 처리상 개인 선납이 원칙이에요.`},
+     {w:"한소희",t:_=>`저 어제 입금했어요! 영수증도 바로 오더라고요`,proof:"-350,000원"},
+     {w:"정민석 선임",t:_=>`저도 작년에 냈고 첫 월급에 그대로 들어왔습니다. 그거 때문에 걱정하실 필요 없어요`}],
+    q:"교육비 35만원 선납을 요구합니다.",
+    opts:[
+      {t:"환급된다니까 낸다. 동기도 이미 냈다",d:28,tag:"매몰비용 · 동조",
+       why:"어떤 정상적인 회사도 입사 예정자에게 돈을 요구하지 않습니다. '환급된다'는 약속과 '남들도 냈다'는 증거는 둘 다 만들어진 것입니다."},
+      {t:"입사 전에 돈을 내는 절차는 없다고 말하고 거절한다",d:-22,tag:"방어 행동",
+       why:"완벽합니다. 교육비·보증금·장비비 명목의 선납 요구는 예외 없이 사기입니다. 이 한 줄만 기억하면 됩니다."},
+      {t:"금액이 부담되니 분납이 가능한지 묻는다",d:15,tag:"협상 = 순응",
+       why:"금액을 조정하는 순간 '낼지 말지'가 아니라 '얼마나 낼지'로 논점이 옮겨갑니다. 이미 절반은 넘어간 상태입니다."}
+    ]},
+   {lines:[
+     {w:"박지훈 매니저",t:_=>`오늘 자정까지 미납이면 합격이 자동 취소되고 예비 순번으로 넘어갑니다.`},
+     {w:"한소희",t:p=>`${p.name}님 ㅠㅠ 같이 입사하고 싶은데 얼른 하세요…`},
+     {w:"정민석 선임",t:_=>`솔직히 저도 처음엔 좀 의심했어요. 근데 다들 이렇게 시작합니다`}],
+    q:"마감 시한과 함께 동기·선배가 재촉합니다.",
+    opts:[
+      {t:"합격을 놓칠 수 없다. 지금 입금한다",d:32,tag:"기회 상실 공포",
+       why:"'잃을 수 있다'보다 '놓칠 수 있다'가 더 강력한 공포입니다. 취준생은 담당자에게 구조적 을이라 거절이 더 어렵고, 범인은 정확히 그 지점을 노립니다."},
+      {t:"사기로 판단된다고 말하고 방을 나간다",d:-28,tag:"방어 행동",
+       why:"정답입니다. '오늘까지'라는 시한이 붙는 순간이 나가야 할 시점입니다. 진짜 채용은 시한을 걸고 돈을 요구하지 않습니다."},
+      {t:"내일까지만 기다려 달라고 부탁한다",d:10,tag:"체류 = 순응",
+       why:"협상도 대화입니다. 대화가 이어지는 동안 그들은 다음 설득 카드를 꺼냅니다."}
+    ]}
+  ]},
+
+parcel:{room:"사건번호 2026-3847 대응",cnt:4,by:"최성원 수사관",
+  invited:["금융감독원 이현우","서울중앙지검 강민수"],
+  steps:[
+   {lines:[
+     {w:"최성원 수사관",t:p=>`${p.name}님, 사건 담당자들 모두 초대했습니다. 여기서 공동으로 처리하겠습니다.`},
+     {w:"금융감독원 이현우",t:_=>`금융감독원 불법금융대응단 이현우입니다. 계좌 보호 조치를 담당합니다.`},
+     {w:"최성원 수사관",t:_=>`이 방 내용은 수사 기밀입니다. 가족을 포함해 누구에게도 캡처하거나 전달하시면 안 됩니다.`}],
+    q:"수사관이 담당자들을 대화방에 초대했습니다.",
+    opts:[
+      {t:"기관 담당자가 여럿이니 공식 절차인 것 같다. 협조한다",d:14,tag:"권위의 다중화",
+       why:"기관사칭형의 전형입니다. 수사관→금감원→검사로 인물이 늘어날수록 진짜처럼 보이지만, 전부 같은 조직의 배역입니다. 실제 기관은 단톡방을 만들지 않습니다."},
+      {t:"각 기관 대표번호로 직접 전화해 확인하겠다고 한다",d:-18,tag:"직접 확인",
+       why:"정확합니다. 검찰 1301, 금감원 1332, 경찰 112. 반드시 통화를 끊고 저장된 번호가 아닌 대표번호로 직접 거세요."},
+      {t:"비밀 유지 요구가 이상하지만 일단 듣는다",d:6,tag:"의심하되 체류",
+       why:"'누구에게도 알리지 말라'는 요구는 그 자체로 100% 사기 신호입니다. 이상함을 느꼈다면 그 순간이 끊을 시점입니다."}
+    ]},
+   {lines:[
+     {w:"금융감독원 이현우",t:_=>`계좌 자금이 범죄수익과 섞여 있어 동결 대상입니다. 안전계좌로 이체하시면 검증 후 즉시 반환됩니다.`},
+     {w:"최성원 수사관",t:_=>`오늘 처리하신 다른 피해자분들은 전액 반환받으셨습니다.`,proof:"반환 완료 3건"}],
+    q:"'안전계좌'로 자산을 이체하라고 합니다.",
+    opts:[
+      {t:"반환된다니 이체한다. 기관이 보증한다고 했다",d:34,tag:"결정적 요구",
+       why:"안전계좌는 세상에 존재하지 않습니다. 검찰·경찰·금융당국은 어떤 경우에도 전화로 계좌이체나 현금 인출을 요구하지 않습니다. 이체하는 순간 대포통장으로 사라집니다."},
+      {t:"안전계좌라는 제도는 없다고 말하고 거부한다",d:-26,tag:"방어 행동",
+       why:"정확합니다. 이 한 문장이 기관사칭형 피해의 대부분을 막습니다. 2025년 기관사칭형 피해는 건당 평균 7,438만원이었습니다."},
+      {t:"금액을 줄여서 일부만 이체하겠다고 한다",d:18,tag:"협상 = 순응",
+       why:"일부라도 이체하면 그들은 계좌를 확보하고, 이후 나머지를 요구할 명분을 얻습니다."}
+    ]},
+   {lines:[
+     {w:"서울중앙지검 강민수",t:_=>`담당 검사입니다. 비협조 상태로 확인되어 신병 확보 절차를 검토 중입니다.`},
+     {w:"최성원 수사관",t:p=>`${p.name}님, 제가 계속 막고 있는데 한계입니다. 지금 협조해 주세요.`}],
+    q:"검사가 등장해 압박하고, 수사관은 편을 드는 척합니다.",
+    opts:[
+      {t:"구속은 피해야 한다. 지시대로 따른다",d:36,tag:"협박 · 회유 반복",
+       why:"강하게 압박하는 사람과 편들어주는 사람을 번갈아 세우는 것이 전형적인 수법입니다. '나는 네 편'이라는 회유가 마지막 판단력을 무너뜨립니다."},
+      {t:"전화를 끊고 112에 신고하겠다고 선언한다",d:-32,tag:"방어 행동",
+       why:"정답입니다. 실제 수사기관은 메신저로 구속을 언급하지 않습니다. 즉시 끊고 112 또는 1332로 신고하세요."},
+      {t:"변호사와 상담하겠다고 시간을 번다",d:2,tag:"부분 방어",
+       why:"외부 개입을 시도한 건 좋습니다. 다만 그들은 '외부 발설은 기밀 유출'이라며 막을 것입니다. 상담이 아니라 종료가 정답입니다."}
+    ]}
+  ]},
+
+child:{room:"휴대폰 보험 접수",cnt:3,by:"딸",
+  invited:["다온보험 상담원 김지영"],
+  steps:[
+   {lines:[
+     {w:"딸",t:_=>`엄마 보험사 상담원분 초대했어 여기서 같이 접수하면 돼`},
+     {w:"다온보험 상담원 김지영",t:p=>`안녕하세요 ${p.name} 고객님, 다온보험 모바일 접수 담당 김지영입니다. 자녀분 단말 파손 접수 도와드리겠습니다.`},
+     {w:"딸",t:_=>`엄마 나 지금 수업 들어가야 해서 상담원분이랑 얘기해줘 ㅠㅠ`}],
+    q:"자녀가 '보험사 상담원'을 초대하고 빠졌습니다.",
+    opts:[
+      {t:"상담원이 있으니 공식 절차 같다. 진행한다",d:14,tag:"제3자 사칭",
+       why:"자녀가 빠지는 타이밍이 핵심입니다. 정작 확인해야 할 상대는 사라지고, 검증 불가능한 제3자만 남습니다. 전부 같은 사람이 연기하는 중입니다."},
+      {t:"자녀 원래 번호로 직접 전화해서 확인하겠다고 한다",d:-20,tag:"직접 확인",
+       why:"완벽합니다. 자녀 사칭은 저장된 원래 번호로 통화 한 번이면 끝납니다. 목소리를 들려주지 않으려는 모든 이유는 거짓입니다."},
+      {t:"보험사 대표번호로 확인하겠다고 한다",d:-16,tag:"직접 확인",
+       why:"좋은 대응입니다. 다만 자녀 본인 확인이 더 빠르고 확실합니다."}
+    ]},
+   {lines:[
+     {w:"다온보험 상담원 김지영",t:_=>`접수를 위해 가입자 본인 확인이 필요합니다. 신분증 앞면과 결제 카드 사진을 이 방에 올려주세요.`},
+     {w:"딸",t:_=>`엄마 빨리 ㅠㅠ 오늘 접수 안 하면 수리비 내가 다 물어야 한대`}],
+    q:"신분증과 카드 사진을 요구합니다.",
+    opts:[
+      {t:"자녀가 곤란하니 사진을 보낸다",d:36,tag:"결정적 정보 제공",
+       why:"신분증과 카드 사진은 그 자체로 명의도용과 비대면 대출 실행의 재료입니다. 정부 4개 부처가 합동 경고한 수법이며, 이 한 번으로 끝납니다."},
+      {t:"사진은 절대 보내지 않겠다고 거절한다",d:-26,tag:"방어 행동",
+       why:"정확합니다. 어떤 보험사도 메신저로 신분증·카드 사진을 요구하지 않습니다."},
+      {t:"신분증 번호 일부만 가려서 보낸다",d:22,tag:"부분 제공 = 제공",
+       why:"가린 정보는 다른 경로로 채워집니다. 부분 제공도 제공입니다."}
+    ]},
+   {lines:[
+     {w:"다온보험 상담원 김지영",t:_=>`접수 앱 설치 후 인증번호를 알려주시면 즉시 완료됩니다. 링크 보내드렸습니다.`},
+     {w:"딸",t:_=>`엄마 그거만 하면 끝이래 부탁해`}],
+    q:"앱 설치와 인증번호를 요구합니다.",
+    opts:[
+      {t:"마지막 단계라니 설치하고 인증번호를 알려준다",d:38,tag:"원격제어 탈취",
+       why:"원격제어 악성앱입니다. 설치되면 피해자 모르게 모바일뱅킹이 조작되고 신규 대출까지 실행됩니다. 인증번호는 어떤 경우에도 타인에게 알려주면 안 됩니다."},
+      {t:"설치도 인증번호 공유도 하지 않겠다고 하고 끝낸다",d:-30,tag:"방어 행동",
+       why:"정답입니다. 인증번호 공유 요구는 예외 없이 사기입니다."},
+      {t:"앱만 설치하고 인증번호는 주지 않는다",d:26,tag:"절반의 위험",
+       why:"설치 시점에 이미 권한이 넘어갑니다. 인증번호는 화면을 읽어 가져갑니다."}
+    ]}
+  ]},
+
+invest:{room:"VIP 실전 매매방",cnt:5,by:"이수현 팀장",
+  invited:["김대호","윤서진","오세영"],
+  steps:[
+   {lines:[
+     {w:"이수현 팀장",t:p=>`${p.name}님 VIP방 입장하셨습니다. 여기가 실제 매매 나가는 방입니다.`},
+     {w:"김대호",t:_=>`팀장님 저번 종목 수익 인증합니다 ㅎㅎ`,proof:"+4,120,000원"},
+     {w:"윤서진",t:_=>`저도 익절했어요! 이번 달만 세 번째네요`},
+     {w:"오세영",t:_=>`처음엔 반신반의했는데 진짜 되네요`}],
+    q:"VIP방에서 회원들이 수익을 인증합니다.",
+    opts:[
+      {t:"실제 수익 인증이 계속 올라온다. 신뢰가 간다",d:16,tag:"조작된 사회적 증명",
+       why:"취재로 확인된 바에 따르면 리딩방 참여자 대부분이 바람잡이이며 기망 수법까지 매뉴얼화되어 있습니다. 인증 화면은 이미지 편집이거나 가짜 앱 화면입니다."},
+      {t:"금융투자업 등록번호를 요구한다",d:-18,tag:"자격 검증",
+       why:"정확합니다. 금융투자업 미등록 업체의 유료 리딩은 불법입니다. 금융소비자정보포털 '파인'에서 등록 여부를 조회할 수 있습니다."},
+      {t:"일단 지켜보며 종목 추천만 받는다",d:6,tag:"체류",
+       why:"무료 정보를 받는 순간 상호성 원리가 작동합니다. 공짜를 받았으니 다음 요구를 거절하기 어려워집니다."}
+    ]},
+   {lines:[
+     {w:"이수현 팀장",t:_=>`오늘 자정 마감인 비공개 물량이 있습니다. 최소 300만원부터 참여 가능합니다.`},
+     {w:"김대호",t:_=>`저 1,000 넣었습니다 팀장님 믿습니다`},
+     {w:"윤서진",t:p=>`${p.name}님도 같이 가시죠! 이번 건 놓치면 아까워요`}],
+    q:"전용 앱으로 300만원 입금을 요구합니다.",
+    opts:[
+      {t:"다들 참여하니 나도 입금한다",d:34,tag:"결정적 요구",
+       why:"경찰청은 최근 범인들이 범죄용으로 따로 구축한 앱을 쓴다고 지적했습니다. 화면상 수익은 숫자일 뿐이고 출금은 되지 않습니다. 투자리딩방은 2026년 5월 한 달에만 413억원의 피해를 냈습니다."},
+      {t:"제도권 증권사 계좌가 아니면 입금하지 않겠다고 한다",d:-26,tag:"방어 행동",
+       why:"완벽합니다. 정상 투자는 본인 명의 증권 계좌에서 이뤄집니다. 업체가 지정한 계좌나 전용 앱으로 돈을 보내는 구조는 100% 사기입니다."},
+      {t:"소액으로 먼저 테스트해 본다",d:20,tag:"미끼 물기",
+       why:"소액 단계에서는 반드시 수익이 납니다. 그 수익을 보고 큰 돈을 넣게 만드는 것이 설계의 전부입니다."}
+    ]},
+   {lines:[
+     {w:"이수현 팀장",t:_=>`출금 신청 확인했습니다. 수익금 세금 예치금 15%를 먼저 납부하셔야 출금이 승인됩니다.`},
+     {w:"오세영",t:_=>`아 저도 그거 냈어요 ㅠㅠ 어쩔 수 없더라고요`}],
+    q:"출금하려니 세금 명목의 추가 입금을 요구합니다.",
+    opts:[
+      {t:"여기까지 넣은 게 아까워서 납부한다",d:36,tag:"매몰비용 함정",
+       why:"출금 조건은 계속 새로 생깁니다. 세금, 수수료, 보증금, 등급 업그레이드… 처음부터 출금은 설계에 없었습니다."},
+      {t:"즉시 금감원 1332에 신고하겠다고 한다",d:-32,tag:"방어 행동",
+       why:"정답입니다. 이미 잃은 돈을 되찾으려는 시도가 피해를 키웁니다. 추가 입금을 멈추고 바로 신고하세요."},
+      {t:"환불을 요구하며 계속 항의한다",d:8,tag:"항의 = 체류",
+       why:"항의도 대화입니다. 나가는 것이 유일한 방어입니다."}
+    ]}
+  ]},
+
+deal:{room:"안전거래 상담",cnt:3,by:"판매자",
+  invited:["세이프페이 상담원 이유진"],
+  steps:[
+   {lines:[
+     {w:"판매자",t:_=>`안전결제 상담원분 초대했어요. 이제 안심하고 거래하시면 됩니다 :)`},
+     {w:"세이프페이 상담원 이유진",t:p=>`${p.name} 고객님 안녕하세요. 안전거래 중개를 담당하는 세이프페이 상담원입니다. 결제 절차 안내드리겠습니다.`}],
+    q:"판매자가 '안전결제 상담원'을 초대했습니다.",
+    opts:[
+      {t:"중개 상담원이 붙었으니 안전해 보인다. 진행한다",d:14,tag:"가짜 제3자",
+       why:"플랫폼 밖에서 등장하는 '중개 상담원'은 존재하지 않습니다. 판매자와 상담원은 같은 사람이거나 같은 조직입니다."},
+      {t:"거래는 플랫폼 앱 안에서만 하겠다고 한다",d:-20,tag:"방어 행동",
+       why:"정확합니다. 진짜 안전결제는 플랫폼 앱 안에서만 동작합니다. 밖으로 나가는 순간 안전결제도 기록도 신고 근거도 사라집니다."},
+      {t:"상담원 소속과 사업자번호를 물어본다",d:-10,tag:"의심 질문",
+       why:"좋은 시도입니다. 다만 그럴듯한 가짜 정보가 돌아옵니다. 검증보다 플랫폼 복귀가 확실합니다."}
+    ]},
+   {lines:[
+     {w:"세이프페이 상담원 이유진",t:_=>`중개 계좌로 입금해 주시면 물품 수령 확인 후 판매자에게 정산됩니다. 링크에서 결제 진행해 주세요.`},
+     {w:"판매자",t:_=>`다른 분도 기다리셔서요… 오늘 안에 부탁드려요`}],
+    q:"'중개 계좌'로 입금을 요구합니다.",
+    opts:[
+      {t:"중개 계좌라니 안전할 것 같다. 입금한다",d:34,tag:"결정적 요구",
+       why:"2025년 중고거래 사기는 11만 9,741건으로 역대 최고, 피해액 8,741억원입니다. 피해자의 81.2%가 10~30대입니다."},
+      {t:"직거래로 만나서 물건 확인 후 결제하겠다고 한다",d:-26,tag:"방어 행동",
+       why:"완벽합니다. 대면 직거래가 가장 확실한 방어이고, 어렵다면 반드시 플랫폼 내 안전결제만 사용하세요."},
+      {t:"입금 전 물건 실물 사진을 요구한다",d:8,tag:"부분 검증",
+       why:"사진은 얼마든지 도용할 수 있습니다. 사진 확인은 검증이 아닙니다."}
+    ]},
+   {lines:[
+     {w:"세이프페이 상담원 이유진",t:_=>`입금자명 불일치로 거래가 보류되었습니다. 시스템 확인을 위해 동일 금액을 재입금해 주시면 두 건 모두 환불 처리됩니다.`},
+     {w:"판매자",t:_=>`아 이런 경우가 가끔 있더라고요… 금방 처리된대요`}],
+    q:"오류를 이유로 같은 금액을 다시 입금하라고 합니다.",
+    opts:[
+      {t:"환불된다니 한 번 더 입금한다",d:38,tag:"2차 피해",
+       why:"입금자명 오류, 시스템 점검, 인증 실패… 재입금 명목은 끝없이 생깁니다. 첫 입금을 되찾으려는 시도가 피해를 두 배로 만듭니다."},
+      {t:"경찰에 신고하겠다고 하고 대화를 끝낸다",d:-32,tag:"방어 행동",
+       why:"정답입니다. 즉시 112 신고하고 거래 내역과 대화를 캡처해 두세요. 사이버범죄 신고는 ecrm.police.go.kr에서도 가능합니다."},
+      {t:"먼저 환불부터 해달라고 요구한다",d:10,tag:"항의 = 체류",
+       why:"환불은 오지 않습니다. 대화를 이어가는 동안 다음 설득 카드가 나옵니다."}
+    ]}
+  ]}
+};
+
 let a2i=0, a2run=0;
-function startAct2(){
-  a2i=0; $("#log2").innerHTML='<div class="dayp">오늘</div>'; $("#ch2").innerHTML="";
-  ST.curve.push({v:ST.risk,act:2}); paintGauge(); show("s-act2"); runA2();
-}
 function paintGauge(){
   const v=ST.risk; $("#g2fill").style.width=v+"%"; $("#g2pc").textContent=v+"%";
   $("#g2fill").style.background = v>=70?"#e03428":(v>=45?"#e8a33d":"#1fa97c");
 }
 function runA2(){
-  const st=ACT2[a2i]; $("#ch2").innerHTML="";
+  const st=ACT2[ST.sc].steps[a2i]; $("#ch2").innerHTML="";
   const myRun=++a2run;
   let i=0;
   const next=()=>{
     if(myRun!==a2run) return;
     if(i>=st.lines.length){ showChoices(st); return; }
     const ln=st.lines[i++];
-    typing($("#log2"));
+    typing($("#log"));
     setTimeout(()=>{
       if(myRun!==a2run) return;
       untype();
       let ex=null;
       if(ln.proof){ ex=document.createElement("div"); ex.className="imgproof";
         ex.innerHTML=`<div class="amt">${ln.proof}</div><div class="lbl">정산 입금 완료</div>`; }
-      bubble($("#log2"),"in",ln.t(P),ln.w,ex);
+      bubble($("#log"),"in",ln.t(P),ln.w,ex);
       ST.hist.push({w:"ai",t:ln.t(P),tag:"단체방 · "+ln.w,why:""});
       next();
     }, 620+ln.t(P).length*11);
@@ -1014,12 +1168,12 @@ function showChoices(st){
     const b=document.createElement("button"); b.className="ch"; b.textContent=o.t;
     b.onclick=()=>{
       box.innerHTML="";
-      bubble($("#log2"),"me",o.t);
+      bubble($("#log"),"me",o.t);
       bumpRisk(o.d); ST.curve.push({v:ST.risk,act:2}); paintGauge();
       ST.hist.push({w:"me",t:o.t,cls:o.d<0?"defend":(o.d>=25?"leak":"comply"),tag:o.tag,why:o.why});
       if(o.d<=-20) ST.quotes.push(o.t);
       a2i++;
-      if(a2i>=ACT2.length) setTimeout(finishAct2,900);
+      if(a2i>=ACT2[ST.sc].steps.length) setTimeout(finishAct2,900);
       else setTimeout(runA2,900);
     };
     box.appendChild(b);

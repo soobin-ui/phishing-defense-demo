@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>안전체험관 QR 안내 피켓</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#5b6172;padding:26px;
+  display:flex;flex-direction:column;align-items:center;gap:26px}
+.sheet{width:210mm;height:297mm;background:#fff;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;box-shadow:0 14px 44px rgba(0,0,0,.34)}
+.hz{height:11mm;flex:none;background:repeating-linear-gradient(-45deg,#e8442c 0 11mm,#0f1d33 11mm 22mm)}
+.body{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:10mm 15mm 8mm}
+.kicker{font-size:11pt;letter-spacing:.42em;color:#8a91a2;font-weight:700}
+.brand{font-size:12pt;color:#0f1d33;font-weight:700;margin-top:4mm;letter-spacing:-.01em}
+.brand b{color:#e8442c}
+h1{font-size:46pt;font-weight:800;line-height:1.05;letter-spacing:-.045em;color:#0f1d33;margin-top:5mm}
+h1 em{font-style:normal;color:#e8442c}
+.sub{font-size:14pt;color:#4b5364;line-height:1.6;margin-top:4mm;font-weight:500;word-break:keep-all}
+.prize{margin-top:6mm;background:#fff5ee;border:1.6pt solid #e8442c;border-radius:5mm;
+  padding:5mm 8mm;display:flex;align-items:center;gap:6mm}
+.prize .ic{font-size:26pt;flex:none}
+.prize .tx{text-align:left}
+.prize .t1{font-size:17pt;font-weight:800;color:#0f1d33;letter-spacing:-.02em}
+.prize .t2{font-size:11.5pt;color:#8a5c3e;margin-top:1.5mm;line-height:1.5}
+.qrwrap{margin-top:6mm;display:flex;flex-direction:column;align-items:center}
+.qrbox{width:66mm;height:66mm;border:2.4pt solid #0f1d33;border-radius:5mm;padding:4mm;background:#fff}
+.qrbox img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.qrcap{font-size:14pt;font-weight:800;color:#0f1d33;margin-top:5mm;letter-spacing:-.02em}
+.qrurl{font-size:9.5pt;color:#9aa1b0;margin-top:2mm;font-family:ui-monospace,monospace}
+.steps{margin-top:auto;width:100%;display:flex;gap:4mm;padding-top:7mm}
+.step{flex:1;background:#f5f6f8;border-radius:4mm;padding:5mm 3mm;text-align:center}
+.step .n{width:9mm;height:9mm;border-radius:50%;background:#0f1d33;color:#fff;font-size:11pt;
+  font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 3mm}
+.step .s{font-size:11pt;font-weight:700;color:#0f1d33;line-height:1.45;word-break:keep-all}
+.step .d{font-size:9pt;color:#7d8494;margin-top:1.5mm;line-height:1.45}
+.foot{flex:none;background:#0f1d33;color:#fff;padding:5mm 15mm;display:flex;
+  align-items:center;justify-content:space-between;gap:6mm}
+.foot .l{font-size:10.5pt;line-height:1.55;text-align:left;color:#b8c0d0}
+.foot .l b{color:#fff}
+.foot .r{font-size:10pt;color:#7f8899;text-align:right;line-height:1.5;flex:none}
+.note{color:#dfe3ea;font-size:10.5pt;text-align:center;max-width:210mm;line-height:1.7}
+@media print{
+  body{background:#fff;padding:0;gap:0}
+  .note{display:none}
+  .sheet{box-shadow:none;width:210mm;height:297mm;page-break-after:always}
+  @page{size:A4 portrait;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="hz"></div>
+  <div class="body">
+    <div class="kicker">SAFETY EXPERIENCE ZONE</div>
+    <div class="brand">2026 산학연협력 EXPO · <b>안전체험관</b></div>
+
+    <h1>나는<br><em>안 속는다</em></h1>
+    <p class="sub">3분이면 끝납니다.<br>당신의 피싱 방어력, 지금 확인해 보세요.</p>
+
+    <div class="prize">
+      <span class="ic">&#127873;</span>
+      <div class="tx">
+        <div class="t1">응모만 해도 기념품 증정</div>
+        <div class="t2">체험 완료 시 등급별 추가 리워드 &middot; 경품 추첨 자동 응모</div>
+      </div>
+    </div>
+
+    <div class="qrwrap">
+      <div class="qrbox"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnYAAAJ2AQMAAADoml26AAAABlBMVEUPHTP///8uYSl0AAADpUlEQVR42u2dUY7jIBAF0foAOZKvzpH2AJHYSYLhvW7sZKXZlUYqfqIkpn4slbqbBkr71nEv8ODBgwcPHjx4/4H3u8yxfX3bH7/fWn18a18f/dnn/3vTCXuTqc95v8r3Dnjw4P1c3ssv++Gbp1+e4+mXx0dr85Hunj6vT2jyCH6BBw9e8ssRjnS/vAKXOUQzbpQ5Ab/AgwfvnV9aCFx6qFIldypTM/gFHjx4f+cXD048FeoqSQEPfoEHD977+svUTA9VfMKr/qJPUn+BBw/eqV/m2Gbg8tmHDPwCDx686Bcfo76bMiIPVSzuGevdvA948OBFv2g5xasqIyNS91SJe27SG4Nf4MGDF/xSRSVdF7dX/UUXpl1BlhjhF3jw4L2tv3SxSFCjKZREM76MRH4EDx688/jlCEBMHptVY8YjN0uoZAsBfoEHD16OX9QaQzozMdKgRlrwauq9433AgwfP/aIO0eKKt8Fsx57IMicclDv1F3jw4F3nR0dwsqX+3V7trbagnX7EL/Dgwcv5UbPgxNp4l99CQtVXmvALPHjwTuOXMpOfEaOkpaIY1ND/Ag8evIv4xbcy+hlS5/0v8Uf8Ag8evFO/LPZIz/7do4b7ili2lZfwCzx48LJfYvIjx9iFim7T/Y2xfMP7gAcPXvSL50BTJbJGVHJv797of4EHD96n8YsfrluOVKit+utKSKHwCzx48KJfdP90mRcHaJnXl6LzPPIjePDgnccvW2qXq6ttAk0KLy0lTfgFHjx40S96XLeWU5oe9aLbBPTsBr2mBL/Agwcv50er819m8jP+qyVdkUT9BR48eNf5USmL+0nyaVOaQukyNfsD4MGDd+EXsUbahrQ4psGERP0FHjx4p/WXsAdAEqM9HlznGdHof8Ev8ODBu8yPQkedbRoI+wPsYO9jOn6BBw9eil/8xumZJkWV6LwRuJAfwYMH78ovYo1olKQZt41UgvELPHjwlvHLajkorB+VcJLmyKuGZngf8ODB8zxncX9j7HHZ7TbHUnT/9N7of4EHD95J/DLHNvOjuiq1tOanwaiJiF/gwYO3yo+8z181k4wyTBTXrolf4MGDt6y/lBCOdKPcbLVae3tj3y/nv8CDB++9X3p9t9pVsOmae1dQwy/w4MH7yC++R7rIGnSV03h9fyP1F3jw4L2vv9SwfuRHvWh+5Hur8Qs8ePCyX+bY0m33qffOT6IKd8fyPuDBg6d++cZxhwcPHjx48ODB+9e8P4RwueWVuoEfAAAAAElFTkSuQmCC" alt="체험 접수 QR 코드"></div>
+      <div class="qrcap">QR 찍고 접수하기</div>
+      <div class="qrurl">soobin-ui.github.io/phishing-defense-demo/v2/</div>
+    </div>
+
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div class="s">QR 접수</div><div class="d">대기 중 미리 작성</div></div>
+      <div class="step"><div class="n">2</div><div class="s">키오스크 체험</div><div class="d">약 3분 소요</div></div>
+      <div class="step"><div class="n">3</div><div class="s">등급 &middot; 리워드</div><div class="d">결과 카드 수령</div></div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="l"><b>보이스피싱 예방 훈련 시뮬레이션입니다.</b><br>실제 개인정보는 입력하지 마세요. 입력값은 체험 종료 즉시 파기됩니다.</div>
+    <div class="r">문의 &middot; 현장 운영데스크<br>금융감독원 1332</div>
+  </div>
+</div>
+
+<p class="note">A4 세로 &middot; 인쇄 시 배경 그래픽 켜기 &middot; 실제 제작은 A1/A2 확대 출력 권장</p>
+
+</body>
+</html>
